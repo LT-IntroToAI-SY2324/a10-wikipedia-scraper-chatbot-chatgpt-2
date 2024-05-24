@@ -112,6 +112,25 @@ def get_birth_date(name: str) -> str:
     return match.group("birth")
 
 
+def get_number_of_followers(religion: str) -> str:
+    """Gets number of folowers of a religion
+
+    Args:
+        religion - name of the religion
+
+    Returns:
+        number of followers of a given religion
+    """
+    infobox_text = clean_text(get_first_infobox_text(get_page_html(religion)))
+    pattern = r"(?:(Number of followers)\D*)(?P<followers>(\d*\.?\d+) (million|billion))"
+    error_text = (
+        "Page infobox has no follower information (at least none in million/billion format)"
+    )
+    match = get_match(infobox_text, pattern, error_text)
+
+    return match.group("followers")
+
+
 # below are a set of actions. Each takes a list argument and returns a list of answers
 # according to the action and the argument. It is important that each function returns a
 # list of the answer(s) and not just the answer itself.
@@ -141,6 +160,18 @@ def polar_radius(matches: List[str]) -> List[str]:
     return [get_polar_radius(matches[0])]
 
 
+def number_of_followers(matches: List[str]) -> List[str]:
+    """Returns polar radius of planet in matches
+
+    Args:
+        matches - match from pattern of planet to find polar radius of
+
+    Returns:
+        polar radius of planet
+    """
+    return [get_number_of_followers(matches[0])]
+
+
 # dummy argument is ignored and doesn't matter
 def bye_action(dummy: List[str]) -> None:
     raise KeyboardInterrupt
@@ -156,6 +187,7 @@ Action = Callable[[List[str]], List[Any]]
 pa_list: List[Tuple[Pattern, Action]] = [
     ("when was % born".split(), birth_date),
     ("what is the polar radius of %".split(), polar_radius),
+    ("how many followers does % have".split(), number_of_followers),
     (["bye"], bye_action),
 ]
 
