@@ -131,6 +131,25 @@ def get_number_of_followers(religion: str) -> str:
     return match.group("followers")
 
 
+def get_instruments(artist: str) -> str:
+    """Gets the instruments that a musical artist uses
+
+    Args:
+        artist - name of the musical artist
+
+    Returns:
+        types of instruments the given musical artist uses
+    """
+    infobox_text = clean_text(get_first_infobox_text(get_page_html(artist)))
+    pattern = r"(?:(Instruments\Instrument\(s\)))(?P<instruments>\D*)Labels"
+    error_text = (
+        "Page infobox has no instruments information"
+    )
+    match = get_match(infobox_text, pattern, error_text)
+
+    return match.group("instruments")
+
+
 # below are a set of actions. Each takes a list argument and returns a list of answers
 # according to the action and the argument. It is important that each function returns a
 # list of the answer(s) and not just the answer itself.
@@ -172,6 +191,18 @@ def number_of_followers(matches: List[str]) -> List[str]:
     return [get_number_of_followers(matches[0])]
 
 
+def instruments(matches: List[str]) -> List[str]:
+    """Returns polar radius of planet in matches
+
+    Args:
+        matches - match from pattern of planet to find polar radius of
+
+    Returns:
+        polar radius of planet
+    """
+    return [get_instruments(matches[0])]
+
+
 # dummy argument is ignored and doesn't matter
 def bye_action(dummy: List[str]) -> None:
     raise KeyboardInterrupt
@@ -188,6 +219,7 @@ pa_list: List[Tuple[Pattern, Action]] = [
     ("when was % born".split(), birth_date),
     ("what is the polar radius of %".split(), polar_radius),
     ("how many followers does % have".split(), number_of_followers),
+    ("what instruments does % use".split(), instruments),
     (["bye"], bye_action),
 ]
 
