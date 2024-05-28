@@ -112,25 +112,6 @@ def get_birth_date(name: str) -> str:
     return match.group("birth")
 
 
-def get_number_of_followers(religion: str) -> str:
-    """Gets number of folowers of a religion
-
-    Args:
-        religion - name of the religion
-
-    Returns:
-        number of followers of a given religion
-    """
-    infobox_text = clean_text(get_first_infobox_text(get_page_html(religion)))
-    pattern = r"(?:(Number of followers)\D*)(?P<followers>(\d*\.?\d+) (million|billion))"
-    error_text = (
-        "Page infobox has no follower information (at least none in million/billion format)"
-    )
-    match = get_match(infobox_text, pattern, error_text)
-
-    return match.group("followers")
-
-
 def get_instruments(artist: str) -> str:
     """Gets the instruments that a musical artist uses
 
@@ -141,13 +122,51 @@ def get_instruments(artist: str) -> str:
         types of instruments the given musical artist uses
     """
     infobox_text = clean_text(get_first_infobox_text(get_page_html(artist)))
-    pattern = r"(?:(Instruments\Instrument\(s\)))(?P<instruments>\D*)Labels"
+    pattern = r"(?:(Instrument\(s\)|Instruments|Instrument))(?P<instruments>.*?)Labels"
     error_text = (
         "Page infobox has no instruments information"
     )
     match = get_match(infobox_text, pattern, error_text)
 
     return match.group("instruments")
+
+
+def get_platforms(video_game: str) -> str:
+    """Gets the platforms available for a video game
+
+    Args:
+        vide_game - name of the video game
+
+    Returns:
+        the different platforms that you can play the video game on
+    """
+    infobox_text = clean_text(get_first_infobox_text(get_page_html(video_game)))
+    pattern = r"(?:(Platform\(s\)|Platforms|Platform))(?P<platforms>.*?)(?:Genre|First|Release)"
+    error_text = (
+        "Page infobox has no platforms information"
+    )
+    match = get_match(infobox_text, pattern, error_text)
+
+    return match.group("platforms")
+
+
+def get_developers(video_game: str) -> str:
+    """Gets the developers available for a video game
+
+    Args:
+        vide_game - name of the video game
+
+    Returns:
+        the different developers that created the video game
+    """
+    infobox_text = clean_text(get_first_infobox_text(get_page_html(video_game)))
+    pattern = r"(?:(Developer\(s\)|Developers|Developer))(?P<developers>.*?)(?:Publisher|First|Release)"
+    error_text = (
+        "Page infobox has no developer information"
+    )
+    match = get_match(infobox_text, pattern, error_text)
+
+    return match.group("developers")
 
 
 # below are a set of actions. Each takes a list argument and returns a list of answers
@@ -179,28 +198,40 @@ def polar_radius(matches: List[str]) -> List[str]:
     return [get_polar_radius(matches[0])]
 
 
-def number_of_followers(matches: List[str]) -> List[str]:
-    """Returns polar radius of planet in matches
-
-    Args:
-        matches - match from pattern of planet to find polar radius of
-
-    Returns:
-        polar radius of planet
-    """
-    return [get_number_of_followers(matches[0])]
-
-
 def instruments(matches: List[str]) -> List[str]:
-    """Returns polar radius of planet in matches
+    """Returns instrments that an artist plays in matches
 
     Args:
-        matches - match from pattern of planet to find polar radius of
+        matches - match from pattern of an artist to find the instruments that they play
 
     Returns:
-        polar radius of planet
+        list of instruments
     """
     return [get_instruments(matches[0])]
+
+
+def platforms(matches: List[str]) -> List[str]:
+    """Returns platforms available for a video game in matches
+
+    Args:
+        matches - match from pattern of video game to find their available platforms
+
+    Returns:
+        list of platforms
+    """
+    return [get_platforms(matches[0])]
+
+
+def developers(matches: List[str]) -> List[str]:
+    """Returns developers of a video game in matches
+
+    Args:
+        matches - match from pattern of video game to find the developers
+
+    Returns:
+        list of developers
+    """
+    return [get_developers(matches[0])]
 
 
 # dummy argument is ignored and doesn't matter
@@ -216,10 +247,31 @@ Action = Callable[[List[str]], List[Any]]
 # The pattern-action list for the natural language query system. It must be declared
 # here, after all of the function definitions
 pa_list: List[Tuple[Pattern, Action]] = [
+
     ("when was % born".split(), birth_date),
+
     ("what is the polar radius of %".split(), polar_radius),
-    ("how many followers does % have".split(), number_of_followers),
+
     ("what instruments does % use".split(), instruments),
+    ("what musical instruments does % use".split(), instruments),
+    ("what instruments does % play".split(), instruments),
+    ("what musical instruments does % play".split(), instruments),
+    ("what kind of musical instruments does % use".split(), instruments),
+    ("what kind of instruments does % use".split(), instruments),
+    ("what kind of musical instruments does % play".split(), instruments),
+    ("what kind of instruments does % play".split(), instruments),
+
+    ("what platforms are available for %".split(), platforms),
+    ("what platforms can % be played on".split(), platforms),
+    ("what platforms can I play % on".split(), platforms),
+    ("what platforms does % support".split(), platforms),
+
+    ("who were the developers of %".split(), developers),
+    ("who developed %".split(), developers),
+    ("who created %".split(), developers),
+    ("who designed %".split(), developers),
+    ("who made %".split(), developers),
+
     (["bye"], bye_action),
 ]
 
