@@ -122,7 +122,7 @@ def get_instruments(artist: str) -> str:
         types of instruments the given musical artist uses
     """
     infobox_text = clean_text(get_first_infobox_text(get_page_html(artist)))
-    pattern = r"(?:(Instrument\(s\)|Instruments|Instrument))(?P<instruments>.*?)Labels"
+    pattern = r"(?:(Instrument\(s\)|Instruments|Instrument))(?P<instruments>.*?)(?:(Labels|Years))"
     error_text = (
         "Page infobox has no instruments information"
     )
@@ -263,7 +263,7 @@ pa_list: List[Tuple[Pattern, Action]] = [
 
     ("what platforms are available for %".split(), platforms),
     ("what platforms can % be played on".split(), platforms),
-    ("what platforms can I play % on".split(), platforms),
+    ("what platforms can i play % on".split(), platforms),
     ("what platforms does % support".split(), platforms),
 
     ("who were the developers of %".split(), developers),
